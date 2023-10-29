@@ -1,4 +1,5 @@
 import random
+from typing import Union, Tuple, Any, List
 
 
 class AirPort:
@@ -32,10 +33,15 @@ class AirportManager:
     def DisplayAP(self):
         for row in self.CostMatrix:
             print(row)
-        pass
 
-    def SearchAP(self):
-        pass
+    def SearchAP(self, NameAP: str) -> Union[tuple[str, Any], str]:
+        for i in range(len(self._ListAP)):
+            if self.CostMatrix[i][i].AirportName == NameAP:
+                adjacencyList: list = list(self.CostMatrix[i])  # Modify the adjacency list of AirPort i
+                adjacencyList[i] = 0
+                return f"Founded ID: {self.CostMatrix[i][i].AirportId} Name: {self.CostMatrix[i][i].AirportName}", adjacencyList
+        else:
+            return f"Can not find the airport with name {NameAP}"
 
     def CostCal(self):
         pass
@@ -53,6 +59,8 @@ def main():
     Manager.AddAP(1, 'Tuyet Voi 1')
     Manager.AddAP(2, 'Tuyet Voi 2')
     Manager.DisplayAP()
+    A = Manager.SearchAP("Tuyet Voi 4")
+    print(A)
     pass
 
 
