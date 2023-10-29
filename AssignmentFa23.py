@@ -32,7 +32,11 @@ class AirportManager:
 
     def DisplayAP(self):
         for row in self.CostMatrix:
-            print(row)
+            for col in row:
+                if type(col) is AirPort:
+                    print(0, end=' ')
+                else: print(col, end=' ')
+            print('')
 
     def SearchAP(self, NameAP: str) -> Union[tuple[str, Any], str]:
         for i in range(len(self._ListAP)):
