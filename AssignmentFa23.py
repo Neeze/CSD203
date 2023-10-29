@@ -39,7 +39,8 @@ class AirportManager:
             if self.CostMatrix[i][i].AirportName == NameAP:
                 adjacencyList: list = list(self.CostMatrix[i])  # Modify the adjacency list of AirPort i
                 adjacencyList[i] = 0
-                return f"Founded ID: {self.CostMatrix[i][i].AirportId} Name: {self.CostMatrix[i][i].AirportName}", adjacencyList
+                return (f"Founded ID: {self.CostMatrix[i][i].AirportId} Name: {self.CostMatrix[i][i].AirportName}",
+                        adjacencyList)
         else:
             return f"Can not find the airport with name {NameAP}"
 
