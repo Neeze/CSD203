@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 
 """
@@ -78,8 +80,8 @@ class AirportManager:
                 old_air = airport.AirportName
                 old_id = airport.AirportId
 
-                weight1 = int(input(f"Input cost from {new_air} Airport to {old_air} Airport: "))
-                weight2 = int(input(f"Input cost from {old_air} Airport to {new_air} Airport: "))
+                weight1 = random.randint(1,100)
+                weight2 = random.randint(1,100)
 
                 self.Matrix[new_id][old_id] = weight1
                 self.Matrix[old_id][new_id] = weight2
