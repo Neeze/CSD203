@@ -1,5 +1,5 @@
 import random
-
+# Code này là trước 6h ngày 30/10. Chạy được
 import numpy as np
 
 """
