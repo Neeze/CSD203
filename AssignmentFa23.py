@@ -131,7 +131,7 @@ class AirportManager:
         else:
             cost = dist[end]
             path = ' -> '.join([self._ListAirports[i].AirportName for i in path[::-1]])
-            print(f"The cost of travel from {FromAP} to {ToAP} is {cost}")
+            print(f"The cost of travel from {FromAP} to {ToAP} is {cost:.2f}")
             print(f"The path is: {path}")
 
     def UpdateAP(self, APId: int, APName: str = None, Location: str = None):
@@ -165,14 +165,12 @@ def main():
     Manager.AddAP(3, 'Tuyet Voi 3')
     Manager.AddAP(4, 'Tuyet Voi 4')
     Manager.AddAP(5, 'Tuyet Voi 5')
+    Manager.AddAP(6, 'Tuyet Voi 6')
+    Manager.AddAP(7, 'Tuyet Voi 7')
     Manager.DisplayAP()
     A = Manager.SearchAP("Tuyet Voi 4")
-    Manager.DelAP('Tuyet Voi')
-    Manager.DelAP('Tuyet Voi 2')
-    print(f"After delete airport")
-    Manager.DisplayAP()
     print(A)
-    Manager.CostCal('Tuyet Voi 1', 'Tuyet Voi 3')
+    Manager.CostCal('Tuyet Voi 1', 'Tuyet Voi 5')
 
 
 if __name__ == "__main__":
