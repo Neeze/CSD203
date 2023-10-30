@@ -1,5 +1,5 @@
 import random
-# Code này là trước 6h ngày 30/10. Chạy được
+# Code này tạo mới để tối ưu
 import numpy as np
 
 """
@@ -8,7 +8,7 @@ import numpy as np
     Quy ước:
         A[i][j] là hàng i, cột j. Lưu cost từ airport ID=i tới airport ID=j
 """
-
+#XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 class AirPort:
     def __init__(self, AirportId: int, AirportName: str):
