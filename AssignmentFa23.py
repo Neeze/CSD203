@@ -11,33 +11,54 @@ class AirPort:
 
 class AirportManager:
     def __init__(self):
-        self.CostMatrix: list = []  # Adjacency matrix
         self._ListAPId: set = set()  # Private set contains Airport have been added
-        self._ListAirports: list = []
-        self._NumberOfAP: int = 0
+        self._ListAirports: list = []  # List of AirPort objects
+        self.CostMatrix: list = []  # Adjacency matrix
+        self.IdToIndex: dict = {}  # Map AirportId to index in _ListAirports and CostMatrix,
+        # dict makes search for an airport by Id in O(1) time
+
+    def _validate_id(self, APId: int) -> bool:
+        if APId in self._ListAPId:
+            print(f"The airport with ID {APId} already exists!")
+            return False
+        elif APId < 0:
+            print("Invalid airport ID!")
+            return False
+        else:
+            return True
+
+    def _validate_name(self, APName: str) -> bool:
+        if not APName:
+            print("Invalid airport name!")
+            return False
+        elif self._Search(APName) != -1:
+            print(f"The airport with name {APName} already exists!")
+            return False
+        else:
+            return True
 
     def AddAP(self, APId: int, APName: str):
         newAirport = AirPort(APId, APName)
-        if APId in self._ListAPId:
-            print(f"The airport with ID {APId} existed!")  # Check APId whether exists or not
+        if not self._validate_id(APId) or not self._validate_name(APName):
+            return  # Check APId whether exists or not and valid id and valid name
         else:
             self._ListAPId.add(APId)
             self._ListAirports.append(newAirport)
+            self.IdToIndex[APId] = len(self._ListAirports) - 1
             adjacencyRow = []
-            for i in range(self._NumberOfAP):
+            for i in range(len(self.IdToIndex)-1):
                 adjacencyRow.append(round(random.random() * 100, 2))  # Generate random cost over other AP
             for row in self.CostMatrix:
                 row.append(round(random.random() * 100, 2))  # Update cost to new AP for each existed AP
             adjacencyRow.append(0)
             self.CostMatrix.append(adjacencyRow)  # Add new adjacency row to adjacency matrix
-            self._NumberOfAP += 1
             print(f"Successfully adding new Airport with ID {APId}!")
 
     def DisplayAP(self):  # Display the matrix
         for row in self.CostMatrix:
             print(row)
 
-    def SearchAP(self, NameAP: str) -> Union[tuple[str, list], str]:
+    def SearchAP(self, NameAP: str) -> Union[tuple[str, list], str]:  # Search Airport by name
         for i in range(len(self._ListAirports)):
             if self._ListAirports[i].AirportName == NameAP:
                 adjacencyList: list = list(self.CostMatrix[i])  # Modify the adjacency list of AirPort i
@@ -56,8 +77,18 @@ class AirportManager:
     def CostCal(self):
         pass
 
-    def UpdateAP(self):
-        pass
+    def UpdateAP(self, APId: int, APName: str = None, Location: str = None):
+        index = self.IdToIndex.get(APId, -1)
+        if index == -1:  # check id
+            print(f"The airport with ID {APId} does not exist!")
+            return
+        if APName:
+            if not self._validate_name(APName):  # verify update Name
+                return
+            self._ListAirports[index].AirportName = APName
+        if Location:  # verify update Location
+            self._ListAirports[index].Location = Location
+        print(f"Successfully updated information for airport with ID {APId}.")
 
     def DelAP(self, APName):
         index = self._Search(APName)
