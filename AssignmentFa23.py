@@ -89,28 +89,22 @@ class AirportManager:
     def CostCal(self, FromAP: str, ToAP: str):  # Using Dijkstra Algorithm
         start = self._Search(FromAP)  # Index of the starting airport
         end = self._Search(ToAP)  # Index of the destination airport
-
         if start == -1 or end == -1:
             print("One or both airports do not exist!")
             return
-
         dist = [INF] * len(self._ListAirports)  # Initialize distances to all airports as infinity
         dist[start] = 0  # Distance from starting airport to itself is zero
         prev = [-1] * len(self._ListAirports)  # Array to store the previous airport in the shortest path
         visited = [False] * len(self._ListAirports)  # Mark all airports as unvisited
-
         for _ in range(len(self._ListAirports) - 1):
             min_dist = INF
             min_dist_vertex = -1
-
             # Find airport with minimum distance from the set of unvisited airports
             for v in range(len(self._ListAirports)):
                 if not visited[v] and dist[v] < min_dist:
                     min_dist = dist[v]
                     min_dist_vertex = v
-
             visited[min_dist_vertex] = True
-
             # Update distances for neighboring airports
             for v in range(len(self._ListAirports)):
                 if not visited[v] and self.CostMatrix[min_dist_vertex][v] != INF:
@@ -118,14 +112,11 @@ class AirportManager:
                     if new_dist < dist[v]:
                         dist[v] = new_dist
                         prev[v] = min_dist_vertex
-
         path = []
         curr = end
-
         while curr != -1:
             path.append(curr)
             curr = prev[curr]
-
         if dist[end] == INF:
             print("No direct path between the two airports")
         else:
