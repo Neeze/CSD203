@@ -46,7 +46,6 @@ class AirportManager:
         Upsize if countV = maxV
         upsize x2 if the matrix full
         """
-
         New_array = self.create_array(2 * capacity)
         Old_array = self.Matrix
         New_array[:self.countV, :self.countV] = Old_array
@@ -68,25 +67,17 @@ class AirportManager:
             self.last.next = new_airport
         self.last = new_airport
 
-        # Add weight to another airports
+        #Add weight to another airports
         if self.countV == 1:    return # Don't need to input if only one airport
         else:
-            airport = self.head
-            while airport != self.last:
+            new_id = new_airport.AirportId
 
-                new_air = new_airport.AirportName
-                new_id = new_airport.AirportId
+            # Change weight from new to every (row)
+            self.Matrix[new_id, :self.countV] = np.random.randint(10, 99, (1, self.countV))
+            # Change weight from every node to new (column)
+            self.Matrix[:self.countV, new_id] = np.random.randint(10, 99, (1, self.countV))
+            self.Matrix[new_id, new_id] = 0
 
-                old_air = airport.AirportName
-                old_id = airport.AirportId
-
-                weight1 = random.randint(1,100)
-                weight2 = random.randint(1,100)
-
-                self.Matrix[new_id][old_id] = weight1
-                self.Matrix[old_id][new_id] = weight2
-
-                airport = airport.next
     def displayAP(self):
         airport = self.head  # airport này là object Airport
         while airport:
@@ -118,6 +109,9 @@ def main():
     A.addAP('Noi Bai')
     A.addAP('Penang')
     A.addAP('Singapore')
+    A.addAP('Chu Lai')
+    A.addAP('Phu Quoc')
+    A.addAP('Tokyo')
     A.displayAP()
     A.display_Matrix()
     print(A.countV,A.maxV)
