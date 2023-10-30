@@ -1,6 +1,8 @@
 import random
 from typing import Union
 
+INF = float('inf')
+
 
 class AirPort:
     def __init__(self, AirportId: int, AirportName: str, Location: str = None):
@@ -56,7 +58,7 @@ class AirportManager:
             self._ListAirports.append(newAirport)
             self.IdToIndex[APId] = len(self._ListAirports) - 1
             adjacencyRow = []
-            for i in range(len(self.IdToIndex)-1):
+            for i in range(len(self.IdToIndex) - 1):
                 adjacencyRow.append(round(random.random() * 100, 2))  # Generate random cost over other AP
             for row in self.CostMatrix:
                 row.append(round(random.random() * 100, 2))  # Update cost to new AP for each existed AP
@@ -84,8 +86,53 @@ class AirportManager:
         else:
             return -1  # return -1 If the Airport does not exist
 
-    def CostCal(self, FromAP: str, ToAP: str):
-        pass
+    def CostCal(self, FromAP: str, ToAP: str):  # Using Dijkstra Algorithm
+        start = self._Search(FromAP)  # Index of the starting airport
+        end = self._Search(ToAP)  # Index of the destination airport
+
+        if start == -1 or end == -1:
+            print("One or both airports do not exist!")
+            return
+
+        dist = [INF] * len(self._ListAirports)  # Initialize distances to all airports as infinity
+        dist[start] = 0  # Distance from starting airport to itself is zero
+        prev = [-1] * len(self._ListAirports)  # Array to store the previous airport in the shortest path
+        visited = [False] * len(self._ListAirports)  # Mark all airports as unvisited
+
+        for _ in range(len(self._ListAirports) - 1):
+            min_dist = INF
+            min_dist_vertex = -1
+
+            # Find airport with minimum distance from the set of unvisited airports
+            for v in range(len(self._ListAirports)):
+                if not visited[v] and dist[v] < min_dist:
+                    min_dist = dist[v]
+                    min_dist_vertex = v
+
+            visited[min_dist_vertex] = True
+
+            # Update distances for neighboring airports
+            for v in range(len(self._ListAirports)):
+                if not visited[v] and self.CostMatrix[min_dist_vertex][v] != INF:
+                    new_dist = dist[min_dist_vertex] + self.CostMatrix[min_dist_vertex][v]
+                    if new_dist < dist[v]:
+                        dist[v] = new_dist
+                        prev[v] = min_dist_vertex
+
+        path = []
+        curr = end
+
+        while curr != -1:
+            path.append(curr)
+            curr = prev[curr]
+
+        if dist[end] == INF:
+            print("No direct path between the two airports")
+        else:
+            cost = dist[end]
+            path = ' -> '.join([self._ListAirports[i].AirportName for i in path[::-1]])
+            print(f"The cost of travel from {FromAP} to {ToAP} is {cost}")
+            print(f"The path is: {path}")
 
     def UpdateAP(self, APId: int, APName: str = None, Location: str = None):
         index = self.IdToIndex.get(APId, -1)
@@ -125,6 +172,7 @@ def main():
     print(f"After delete airport")
     Manager.DisplayAP()
     print(A)
+    Manager.CostCal('Tuyet Voi 1', 'Tuyet Voi 3')
 
 
 if __name__ == "__main__":
