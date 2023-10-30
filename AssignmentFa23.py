@@ -1,3 +1,4 @@
+import itertools
 import random
 from typing import Union
 
@@ -33,6 +34,16 @@ class AirportManager:
             return False
         elif self._Search(APName) != -1:
             print(f"The airport with name {APName} already exists!")
+            return False
+        else:
+            return True
+
+    def _validate_indexes(self, i: int, j: int) -> bool:
+        if i not in self.IdToIndex or j not in self.IdToIndex:
+            print(f"One or both of airports do not exist!")
+            return False
+        elif i == j:
+            print(f"The airports are the same!")
             return False
         else:
             return True
@@ -74,12 +85,12 @@ class AirportManager:
         else:
             return -1  # return -1 If the Airport does not exist
 
-    def CostCal(self):
+    def CostCal(self, FromAP: str, ToAP: str):
         pass
 
     def UpdateAP(self, APId: int, APName: str = None, Location: str = None):
         index = self.IdToIndex.get(APId, -1)
-        if index == -1:  # check id
+        if index == -1:  # check index
             print(f"The airport with ID {APId} does not exist!")
             return
         if APName:
