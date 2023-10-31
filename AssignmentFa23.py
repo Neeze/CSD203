@@ -145,6 +145,7 @@ class AirportManager:
         self.Matrix[:, self.countV] = 0
         # Change the new information for the delete id
         self.array[id_del] = self.array[self.countV]
+        self.array[id_del].AirportId = id_del
         # remove last item
         self.array.pop()
         return True
@@ -158,6 +159,9 @@ def main():
     A.addAP('Cam Ranh', 'Khanh Hoa')
     A.addAP('Phu Bai', 'Thua Thien-Hue')
 
+    A.displayAP()
+    A.display_Matrix()
+    A.delAP(3)
     A.displayAP()
     A.display_Matrix()
     A.costCal(0, 4)
