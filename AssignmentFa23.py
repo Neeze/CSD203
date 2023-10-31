@@ -1,5 +1,3 @@
-import random
-# Code này tạo mới để tối ưu
 import numpy as np
 
 """
@@ -11,9 +9,8 @@ import numpy as np
 
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
 class AirPort:
-    def __init__(self, AirportId: int, AirportName: str, Location:str):
+    def __init__(self, AirportId: int, AirportName: str, Location: str):
         self.AirportId = AirportId
         self.AirportName = AirportName
         self.Location = Location
@@ -54,15 +51,13 @@ class AirportManager:
             return True
         return False
 
-
-
-    def addAP(self, Airport_Name,Airport_Location):
+    def addAP(self, Airport_Name, Airport_Location):
         # Check capacity
         self.countV += 1
         self.resize_array()
 
         # Add Airport object to Array
-        new_airport = AirPort(self.countV - 1, Airport_Name,Airport_Location)  # Vì matrix start từ 0
+        new_airport = AirPort(self.countV - 1, Airport_Name, Airport_Location)  # Vì matrix start từ 0
         self.array.append(new_airport)
 
         # Add weight to another airports
@@ -89,16 +84,41 @@ class AirportManager:
             if name in airport.AirportName:
                 airport.show_airport()
 
-    def dfs(self,id):
-        pass
-    def costCal(self):
-        # Create a list contain ID for visit DFS
-        dd = np.zeros((self.countV,))
+    def show_path(self, listID, cost):
+        for i in listID:
+            print(i, end=' -> ')
+        print(cost)
 
-    def valid_ID(self,id_check):
+    def dfs(self, path_id, end_id, dd, cost, listID):
+        dd[path_id] = 1
+        if path_id == end_id:
+            self.show_path(listID, cost)
+            return
+
+        for next_id in range(self.countV):
+            if dd[next_id] == 0:
+                # Visit next_id
+                listID.append(next_id)
+                cost += self.Matrix[path_id][next_id]
+                self.dfs(next_id, end_id, dd, cost, listID)
+                # After visited, backup
+                listID.pop()
+                cost -= self.Matrix[path_id][next_id]
+                dd[next_id] = 0
+
+    def costCal(self, startID, endID):
+        # dd = 1 if visited, dd = 0 if not
+        dd = np.zeros((self.countV,))
+        cost = 0
+        listID = []  # Save the path of ID
+        listID.append(startID)
+        self.dfs(startID, endID, dd, cost, listID)
+
+    def valid_ID(self, id_check):
         if id_check >= self.countV or id_check < 0:
             return False
         return True
+
     def updateAP(self, id_update):
         # Check ID if valid
         if not self.valid_ID(id_update):
@@ -127,6 +147,7 @@ class AirportManager:
         self.array[id_del] = self.array[self.countV]
         # remove last item
         self.array.pop()
+        return True
 
 
 def main():
@@ -136,17 +157,10 @@ def main():
     A.addAP('Da Nang Inter', 'Da Nang')
     A.addAP('Cam Ranh', 'Khanh Hoa')
     A.addAP('Phu Bai', 'Thua Thien-Hue')
-    A.addAP('Cat Bi', 'Hai Phong')
-    A.addAP('Phu Quoc', 'Kien Giang')
 
     A.displayAP()
     A.display_Matrix()
-    A.delAP(3)
-    A.displayAP()
-    A.display_Matrix()
-    A.updateAP(4)
-    A.displayAP()
-    A.display_Matrix()
+    A.costCal(0, 4)
 
 
 if __name__ == '__main__':
