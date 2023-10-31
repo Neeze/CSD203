@@ -138,9 +138,7 @@ def main():
     A.addAP('Phu Bai', 'Thua Thien-Hue')
     A.addAP('Cat Bi', 'Hai Phong')
     A.addAP('Phu Quoc', 'Kien Giang')
-    A.addAP('Can Tho Inter', 'Can Tho')
-    A.addAP('Lien Khuong', 'Lam Dong')
-    A.addAP('Dien Bien Phu', 'Dien Bien')
+
     A.displayAP()
     A.display_Matrix()
     A.delAP(3)
