@@ -1,0 +1,17 @@
+Airport informations: 
+ID: 0 	Name: Tan Son Nhat				Location: Ho Chi Minh
+ID: 1 	Name: Noi Bai				Location: Ha Noi
+ID: 2 	Name: Da Nang Inter				Location: Da Nang
+ID: 3 	Name: Cam Ranh				Location: Khanh Hoa
+ID: 4 	Name: Phu Bai				Location: Thua Thien-Hue
+
+A[i][j] là hàng i, cột j. Lưu cost từ airport ID=i tới airport ID=j
+
+[[ 0. 62. 20. 63. 50.  0.  0.  0.]
+ [29.  0. 60. 76. 88.  0.  0.  0.]
+ [14. 70.  0. 96. 30.  0.  0.  0.]
+ [13. 56. 43.  0. 94.  0.  0.  0.]
+ [27. 65. 96. 49.  0.  0.  0.  0.]
+ [ 0.  0.  0.  0.  0.  0.  0.  0.]
+ [ 0.  0.  0.  0.  0.  0.  0.  0.]
+ [ 0.  0.  0.  0.  0.  0.  0.  0.]]

@@ -1,5 +1,5 @@
 import random
-
+import sys
 import numpy as np
 import folium
 from geopy.distance import geodesic
@@ -229,6 +229,23 @@ def main():
             break
         input("Press Enter for continue.")
     # A.showMap()
+
+    # Export to txt file
+    with open("airport_data.txt", "w", newline="",encoding='utf-8') as file:
+        # Redirect output sang file
+        sys.stdout = file
+
+        # Bây giờ mọi thứ sẽ được in ra file 'output.txt' thay vì màn hình console
+        print("Airport informations: ")
+        A.displayAP()
+        print()
+        print("A[i][j] là hàng i, cột j. Lưu cost từ airport ID=i tới airport ID=j")
+        print()
+        A.display_Matrix()
+
+        # Đặt lại sys.stdout để trả lại việc in ra màn hình console
+        sys.stdout = sys.__stdout__
+
 
 
 if __name__ == '__main__':
