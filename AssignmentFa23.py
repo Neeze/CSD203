@@ -3,7 +3,7 @@ import random
 import numpy as np
 
 """
-    Gồm 1 linked_list 2 con trỏ lưu các object Airport, các Airport gồm ID,name,next
+    Gồm 1 Array lưu các object Airport, các Airport gồm ID,name,location
     1 Matrix lưu trọng số
     Quy ước:
         A[i][j] là hàng i, cột j. Lưu cost từ airport ID=i tới airport ID=j
@@ -13,14 +13,13 @@ import numpy as np
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 class AirPort:
-    def __init__(self, AirportId: int, AirportName: str):
+    def __init__(self, AirportId: int, AirportName: str, Location:str):
         self.AirportId = AirportId
         self.AirportName = AirportName
-        # self.next lưu các Airport tiếp theo
-        self.next = None
+        self.Location = Location
 
     def show_airport(self):
-        print(f"ID: {self.AirportId}\t\tName: {self.AirportName}")
+        print(f"ID: {self.AirportId} \tName: {self.AirportName}\t\t\t\tLocation: {self.Location}")
 
 
 class AirportManager:
@@ -31,10 +30,8 @@ class AirportManager:
         self.maxV = 1
         # Ma trận lưu trọng số
         self.Matrix = self.create_array(self.maxV)
-
-        # create Head and Last for linked List
-        self.head = None
-        self.last = None
+        # Array to save Airport object
+        self.array = []
 
     def create_array(self, capacity):
         """
@@ -57,18 +54,16 @@ class AirportManager:
             return True
         return False
 
-    def addAP(self, Airport_Name):
+
+
+    def addAP(self, Airport_Name,Airport_Location):
         # Check capacity
         self.countV += 1
         self.resize_array()
 
-        # Add Airport to Linked List
-        new_airport = AirPort(self.countV - 1, Airport_Name)  # Vì matrix start từ 0
-        if self.head is None:
-            self.head = new_airport
-        else:
-            self.last.next = new_airport
-        self.last = new_airport
+        # Add Airport object to Array
+        new_airport = AirPort(self.countV - 1, Airport_Name,Airport_Location)  # Vì matrix start từ 0
+        self.array.append(new_airport)
 
         # Add weight to another airports
         if self.countV == 1:
@@ -83,20 +78,16 @@ class AirportManager:
             self.Matrix[new_id, new_id] = 0
 
     def displayAP(self):
-        airport = self.head  # airport này là object Airport
-        while airport:
+        for airport in self.array:
             airport.show_airport()
-            airport = airport.next
 
     def display_Matrix(self):
         print(self.Matrix)
 
     def searchAP(self, name):
-        airport = self.head
-        while airport:
+        for airport in self.array:
             if name in airport.AirportName:
                 airport.show_airport()
-            airport = airport.next
 
     def dfs(self,id):
         pass
@@ -104,37 +95,27 @@ class AirportManager:
         # Create a list contain ID for visit DFS
         dd = np.zeros((self.countV,))
 
+    def valid_ID(self,id_check):
+        if id_check >= self.countV or id_check < 0:
+            return False
+        return True
     def updateAP(self, id_update):
-        airport = self.head
-        state_tus = 0
-        # Update Airport Name
-        while airport:
-            if airport.AirportId == id_update:
-                airport.AirportName = input(f"New Airport Name for ID {id_update}: ")
-                state_tus = 1
-                break
-            airport = airport.next
-        if state_tus == 0: return False
+        # Check ID if valid
+        if not self.valid_ID(id_update):
+            return False
+
+        # Update Name and Location
+        self.array[id_update].AirportName = input(f"New Airport Name for ID {id_update}: ")
+        self.array[id_update].Location = input(f"New Location Name for ID {id_update}: ")
+
         # Update new weight
         self.Matrix[id_update, :self.countV] = np.random.randint(10, 99, (1, self.countV))
         self.Matrix[:self.countV, id_update] = np.random.randint(10, 99, (1, self.countV))
         self.Matrix[id_update, id_update] = 0
         return True
 
-    def change_Linkedlist(self, id_del):
-        t = self.head
-        while t.AirportId != id_del:
-            t = t.next
-        t.AirportName = self.last.AirportName
-
-        while t.next != self.last:
-            t = t.next
-        self.last = None
-        self.last = t
-        t.next = None
-
     def delAP(self, id_del):
-        if id_del >= self.countV or id_del < 0:
+        if not self.valid_ID(id_del):
             return False
         self.countV -= 1
         # delete weight related to airport_delete
@@ -143,18 +124,23 @@ class AirportManager:
         self.Matrix[self.countV, :] = 0
         self.Matrix[:, self.countV] = 0
         # Change the new information for the delete id
-        self.change_Linkedlist(id_del)
+        self.array[id_del] = self.array[self.countV]
+        # remove last item
+        self.array.pop()
 
 
 def main():
     A = AirportManager()
-    A.addAP('Tan Son Nhat')
-    A.addAP('Noi Bai')
-    A.addAP('Penang')
-    A.addAP('Singapore')
-    A.addAP('Chu Lai')
-    A.addAP('Phu Quoc')
-    A.addAP('Tokyo')
+    A.addAP('Tan Son Nhat', 'Ho Chi Minh')
+    A.addAP('Noi Bai', 'Ha Noi')
+    A.addAP('Da Nang Inter', 'Da Nang')
+    A.addAP('Cam Ranh', 'Khanh Hoa')
+    A.addAP('Phu Bai', 'Thua Thien-Hue')
+    A.addAP('Cat Bi', 'Hai Phong')
+    A.addAP('Phu Quoc', 'Kien Giang')
+    A.addAP('Can Tho Inter', 'Can Tho')
+    A.addAP('Lien Khuong', 'Lam Dong')
+    A.addAP('Dien Bien Phu', 'Dien Bien')
     A.displayAP()
     A.display_Matrix()
     A.delAP(3)
