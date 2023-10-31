@@ -1,191 +1,235 @@
 import random
-from typing import Union
 
-INF = float('inf')
+import numpy as np
+import folium
+from geopy.distance import geodesic
 
+"""
+    Gồm 1 Array lưu các object Airport, các Airport gồm ID,name,location
+    1 Matrix lưu trọng số
+    Quy ước:
+        A[i][j] là hàng i, cột j. Lưu cost từ airport ID=i tới airport ID=j
+"""
+
+
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class AirPort:
-    def __init__(self, AirportId: int, AirportName: str, Location: str = None):
+    def __init__(self, AirportId: int, AirportName: str, Location: str):
         self.AirportId = AirportId
         self.AirportName = AirportName
         self.Location = Location
 
+    def show_airport(self):
+        print(f"ID: {self.AirportId} \tName: {self.AirportName}\t\t\t\tLocation: {self.Location}")
+
 
 class AirportManager:
     def __init__(self):
-        self._ListAPId: set = set()
-        self._ListAirports: list = []
-        self.CostMatrix: list = []
-        self.IdToIndex: dict = {}
-        self.routes = []
+        # countV là số lượng sân bay, mỗi sân bay thêm vào thì ID increase 1
+        self.countV = 0
+        # maxV is Matrix's capacity, full when countV = maxV
+        self.maxV = 1
+        # Ma trận lưu trọng số
+        self.Matrix = self.create_array(self.maxV)
+        # Array to save Airport object
+        self.array = []
 
-    def _validate_id(self, APId: int) -> bool:
-        if APId in self._ListAPId:
-            print(f"The airport with ID {APId} already exists!")
-            return False
-        elif APId < 0:
-            print("Invalid airport ID!")
-            return False
-        else:
+    def create_array(self, capacity):
+        """
+        Create 2 dimension array NxN
+        """
+        return np.zeros((capacity, capacity))
+
+    def resize_array(self):
+        """
+        check before insert
+        Upsize if countV = maxV
+        upsize x2 if the matrix full
+        """
+        if self.countV == self.maxV:
+            New_array = self.create_array(2 * self.maxV)
+            Old_array = self.Matrix
+            New_array[:self.countV, :self.countV] = Old_array
+            self.Matrix = New_array
+            self.maxV = 2 * self.maxV
             return True
+        return False
 
-    def _validate_name(self, APName: str) -> bool:
-        if not APName:
-            print("Invalid airport name!")
-            return False
-        elif self._Search(APName) != -1:
-            print(f"The airport with name {APName} already exists!")
-            return False
+    def addAP(self, Airport_Name, Airport_Location):
+        # Check capacity
+        self.countV += 1
+        self.resize_array()
+
+        # Add Airport object to Array
+        new_airport = AirPort(self.countV - 1, Airport_Name, Airport_Location)  # Vì matrix start từ 0
+        self.array.append(new_airport)
+
+        # Add weight to another airports
+        if self.countV == 1:
+            return  # Don't need to input if only one airport
         else:
-            return True
+            new_id = new_airport.AirportId
 
-    def _validate_indexes(self, i: int, j: int) -> bool:
-        if i not in self.IdToIndex or j not in self.IdToIndex:
-            print(f"One or both of airports do not exist!")
-            return False
-        elif i == j:
-            print(f"The airports are the same!")
-            return False
-        else:
-            return True
+            # Change weight from new to every (row)
+            self.Matrix[new_id, :self.countV] = np.random.randint(10, 99, (1, self.countV))
+            # Change weight from every node to new (column)
+            self.Matrix[:self.countV, new_id] = np.random.randint(10, 99, (1, self.countV))
+            self.Matrix[new_id, new_id] = 0
 
-    def AddAP(self, APId: int, APName: str):
-        newAirport = AirPort(APId, APName)
-        if not self._validate_id(APId) or not self._validate_name(APName):
-            return  # Check APId whether exists or not and valid id and valid name
-        else:
-            self._ListAPId.add(APId)
-            self._ListAirports.append(newAirport)
-            self.IdToIndex[APId] = len(self._ListAirports) - 1
-            adjacencyRow = []
-            for i in range(len(self.IdToIndex)-1):
-                adjacencyRow.append(round(random.random() * 100, 2))  # Generate random cost over other AP
-            for row in self.CostMatrix:
-                row.append(round(random.random() * 100, 2))  # Update cost to new AP for each existed AP
-            adjacencyRow.append(0)
-            self.CostMatrix.append(adjacencyRow)  # Add new adjacency row to adjacency matrix
-            print(f"Successfully adding new Airport with ID {APId}!")
+    def displayAP(self):
+        for airport in self.array:
+            airport.show_airport()
 
-    def DisplayAP(self):  # Display the matrix
-        for row in self.CostMatrix:
-            print(row)
+    def display_Matrix(self):
+        print(self.Matrix)
 
-    def SearchAP(self, NameAP: str) -> Union[tuple[str, list], str]:  # Search Airport by name
-        for i in range(len(self._ListAirports)):
-            if self._ListAirports[i].AirportName == NameAP:
-                adjacencyList: list = list(self.CostMatrix[i])  # Modify the adjacency list of AirPort i
-                return (f"Founded ID: {self._ListAirports[i].AirportId} Name: {self._ListAirports[i].AirportName}",
-                        adjacencyList)
-        else:
-            return f"Can not find the airport with name {NameAP}"
+    def searchAP(self, name):
+        for airport in self.array:
+            if name in airport.AirportName:
+                airport.show_airport()
 
-    def _Search(self, NameAP: str) -> int:  # Private Search for name and return the index of the Airport
-        for i in range(len(self._ListAirports)):
-            if self._ListAirports[i].AirportName == NameAP:
-                return i  # return index of AP
-        else:
-            return -1  # return -1 If the Airport does not exist
+    def show_path(self, listID, cost):
+        for i in listID:
+            print(i, end=' -> ')
+        print(cost)
 
-
-    def UpdateAP(self, APId: int, APName: str = None, Location: str = None):
-        index = self.IdToIndex.get(APId, -1)
-        if index == -1:  # check index
-            print(f"The airport with ID {APId} does not exist!")
-            return
-        if APName:
-            if not self._validate_name(APName):  # verify update Name
-                return
-            self._ListAirports[index].AirportName = APName
-        if Location:  # verify update Location
-            self._ListAirports[index].Location = Location
-        print(f"Successfully updated information for airport with ID {APId}.")
-
-    def DelAP(self, APName):
-        index = self._Search(APName)
-        if index != -1:
-            self._ListAPId.remove(self._ListAirports[index].AirportId)
-            del (self._ListAirports[index])
-            del (self.CostMatrix[index])  # Delete in set
-            for row in self.CostMatrix:
-                del (row[index])
-
-    def calculate_all_routes(self, from_id, to_id, current_route, current_cost, visited):
-        # Nếu điểm xuất phát và điểm đích giống nhau
-        if from_id == to_id:
-            route_copy = current_route.copy()  # Sao chép tuyến đường hiện tại để không bị thay đổi
-            route_copy.append(self._ListAirports[to_id].AirportName)  # Thêm điểm đích vào tuyến đường
-            self.routes.append((route_copy, current_cost))  # Thêm tuyến đường và chi phí tương ứng vào danh sách routes
+    def dfs(self, path_id, end_id, dd, cost, listID):
+        dd[path_id] = 1
+        if path_id == end_id:
+            self.show_path(listID, cost)
             return
 
-        visited[from_id] = True  # Đánh dấu điểm xuất phát là đã được thăm
-        current_route.append(self._ListAirports[from_id].AirportName)  # Thêm điểm xuất phát vào tuyến đường hiện tại
+        for next_id in range(self.countV):
+            if dd[next_id] == 0:
+                # Visit next_id
+                listID.append(next_id)
+                cost += self.Matrix[path_id][next_id]
+                self.dfs(next_id, end_id, dd, cost, listID)
+                # After visited, backup
+                listID.pop()
+                cost -= self.Matrix[path_id][next_id]
+                dd[next_id] = 0
 
-        # Duyệt qua tất cả các điểm kề của điểm xuất phát
-        for v in range(len(self._ListAirports)):
-            # Nếu điểm kề chưa được thăm và có chi phí để đi đến nó
-            if not visited[v] and self.CostMatrix[from_id][v] != INF:
-                # Tính toán tuyến đường và chi phí từ điểm xuất phát đến điểm kề và tiếp tục tìm các tuyến đường khác
-                self.calculate_all_routes(v, to_id, current_route, current_cost + self.CostMatrix[from_id][v], visited)
+    def costCal(self, startID, endID):
+        # dd = 1 if visited, dd = 0 if not
+        dd = np.zeros((self.countV,))
+        cost = 0
+        listID = []  # Save the path of ID
+        listID.append(startID)
+        self.dfs(startID, endID, dd, cost, listID)
 
-        visited[from_id] = False  # Đánh dấu điểm xuất phát chưa được thăm
-        current_route.pop()  # Loại bỏ điểm xuất phát khỏi tuyến đường hiện tại
+    def valid_ID(self, id_check):
+        if id_check >= self.countV or id_check < 0:
+            return False
+        return True
 
-    def calculate_route_costs(self, from_id, to_id):
-        # Kiểm tra xem các ID của điểm xuất phát và điểm đích có hợp lệ không
-        if 0 <= from_id < len(self._ListAirports) and 0 <= to_id < len(self._ListAirports):
-            from_name = self._ListAirports[from_id].AirportName  # Lấy tên của điểm xuất phát
-            to_name = self._ListAirports[to_id].AirportName  # Lấy tên của điểm đích
+    def updateAP(self, id_update):
+        # Check ID if valid
+        if not self.valid_ID(id_update):
+            return False
 
-            self.routes = []  # Danh sách lưu trữ tuyến đường và chi phí tương ứng
-            visited = [False] * len(self._ListAirports)  # Mảng đánh dấu các điểm đã được thăm
-            self.calculate_all_routes(from_id, to_id, [], 0, visited)  # Tính toán tất cả các tuyến đường và chi phí
+        # Update Name and Location
+        self.array[id_update].AirportName = input(f"New Airport Name for ID {id_update}: ")
+        self.array[id_update].Location = input(f"New Location Name for ID {id_update}: ")
 
-            print(f"All routes and costs from {from_name} to {to_name}:")
-            # Hiển thị tất cả các tuyến đường và chi phí tương ứng
-            for route, cost in self.routes:
-                print(f"Route: {' -> '.join(route)}, Cost: {cost}")
-        else:
-            print("Invalid airport IDs.")  # Thông báo nếu các ID của điểm xuất phát hoặc điểm đích không hợp lệ
+        # Update new weight
+        self.Matrix[id_update, :self.countV] = np.random.randint(10, 99, (1, self.countV))
+        self.Matrix[:self.countV, id_update] = np.random.randint(10, 99, (1, self.countV))
+        self.Matrix[id_update, id_update] = 0
+        return True
+
+    def delAP(self, id_del):
+        if not self.valid_ID(id_del):
+            return False
+        self.countV -= 1
+        # delete weight related to airport_delete
+        self.Matrix[id_del, :] = self.Matrix[self.countV, :]
+        self.Matrix[:, id_del] = self.Matrix[:, self.countV]
+        self.Matrix[self.countV, :] = 0
+        self.Matrix[:, self.countV] = 0
+        # Change the new information for the delete id
+        self.array[id_del] = self.array[self.countV]
+        self.array[id_del].AirportId = id_del
+        # remove last item
+        self.array.pop()
+        return True
+
+    def showMap(self):
+        m = folium.Map(location=(10.841188, 106.809938))
+        loc_airport = []
+        for airport in range(len(self.array)):
+            loc_airport.append([round(random.uniform(10.01, 10.99), 4), round(random.uniform(106.01, 106.99), 4)])
+        for airport_index in range(len(loc_airport)):
+            print(loc_airport[airport_index], self.array[airport_index].AirportName)
+            folium.Marker(
+                location=loc_airport[airport_index],
+                tooltip="Airport: " + self.array[airport_index].AirportName,
+                icon=folium.Icon(icon="plane"),
+            ).add_to(m)
+            for sub_airport_index in range(len(loc_airport)):
+                if sub_airport_index == airport_index:
+                    continue
+                folium.PolyLine(
+                    [
+                        loc_airport[airport_index],
+                        loc_airport[sub_airport_index]
+                    ],
+                    color='red',
+                    weight=4,
+                    tooltip=f"{self.array[airport_index].AirportName} to {self.array[sub_airport_index].AirportName}"
+                            f" distance: {round(geodesic(loc_airport[airport_index], loc_airport[sub_airport_index]).km, 2)}km,"
+                            f" cost: {self.Matrix[airport_index, sub_airport_index]} or {self.Matrix[sub_airport_index, airport_index]}",
+                    opacity=0.8
+                ).add_to(m)
+        m.show_in_browser()
 
 
 def main():
-    Manager = AirportManager()
+    A = AirportManager()
+    # init airport
+    A.addAP('Tan Son Nhat', 'Ho Chi Minh')
+    A.addAP('Noi Bai', 'Ha Noi')
+    A.addAP('Da Nang Inter', 'Da Nang')
+    A.addAP('Cam Ranh', 'Khanh Hoa')
+    A.addAP('Phu Bai', 'Thua Thien-Hue')
 
-    # Thêm các sân bay
-    Manager.AddAP(0, 'Tan Son Nhat')
-    Manager.AddAP(1, 'Noi Bai')
-    Manager.AddAP(2, 'VietJet')
-    Manager.AddAP(3, 'AirLine')
-    Manager.AddAP(4, 'LanexAirport')
+    while True:
+        print('\n'
+              '=====================================================================\n'
+              'Thank you for using Airport Manager System, please select feature:\n'
+              '1. Add new airport.\n'
+              '2. Show list exist airport.\n'
+              '3. Search airport.\n'
+              '4. Calculate all trip available from 2 airport.\n'
+              '5. Delete exist airport.\n'
+              '6. Show airport in map (chương trình sẽ bị thoát khi sử dụng tính năng).\n'
+              '7. Close program.\n'
+              '====================================================================='
+              '')
+        feauture = int(input("Your chooose:"))
+        if 4 <= feauture <= 5:
+            print("================================")
+            print("Available airport:")
+            A.displayAP()
+            print("================================")
+        if feauture == 1:
+            A.addAP(str(input("Airport Name:")), str(input("Airport city location:")))
+        elif feauture == 2:
+            A.displayAP()
+        elif feauture == 3:
+            A.searchAP(str(input("Airport Name for searching:")))
+        elif feauture == 4:
+            A.costCal(int(input("Enter ID of departure airport:")), int(input("Enter ID of destination airport:")))
+        elif feauture == 5:
+            A.delAP(int(input("Enter ID want to delete:")))
+        elif feauture == 6:
+            A.showMap()
+            break
+        elif feauture == 7:
+            break
+        input("Press Enter for continue.")
+    # A.showMap()
 
-    # Hiển thị thông tin các sân bay
-    print("Airport Information:")
-    Manager.DisplayAP()
 
-    # Tìm kiếm sân bay
-    search_name = "Noi Bai"
-    print(f"\nSearching airports containing '{search_name}':")
-    found_airport = Manager.SearchAP(search_name)
-    print(found_airport)
-
-    # Tính chi phí từ một sân bay đến sân bay khác
-    from_id = 0
-    to_id = 4
-    print(f"\nCalculating route costs from ID {from_id} to ID {to_id}:")
-    Manager.calculate_route_costs(from_id, to_id)
-
-    # Cập nhật thông tin sân bay
-    update_id = 2
-    new_name = "VietJet International"
-    print(f"\nUpdating airport with ID {update_id} to '{new_name}':")
-    Manager.UpdateAP(update_id, new_name)
-    Manager.DisplayAP()
-
-    # Xóa một sân bay
-    delete_id = 1
-    print(f"\nDeleting airport with ID {delete_id}:")
-    Manager.DelAP(delete_id)
-    Manager.DisplayAP()
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
-
